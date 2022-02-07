@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include "lab3.h"
+
+int main(){
+
+//	struct party_node *a = NULL, *b = NULL;
+//	add_request(&a, "a", 2, "");
+//	add_request(&a, "a", 4, "");
+//	add_request(&a, "a", 7, "");
+//	add_request(&a, "a", 10, "");
+//	add_request(&b, "b", 1, "");
+//	add_request(&b, "b", 2, "");
+//	add_request(&b, "b", 3, "");
+//	add_request(&b, "b", 8, "");
+//	struct party_node *c = merge(a, b);
+//	struct party_node *d = split(c);
+//	print_list(c);
+//	print_list(d);
+//	return 0;
+
+    //Empty list
+    struct party_node *head = NULL;
+
+    int check_add = 0;
+    //Adding TA requests
+    printf("Adding the TA requests:\n");
+    check_add = add_request(&head, "Speakers", 99.99, "Zoe");
+    check_add = add_request(&head, "Sushi", 288.88, "Ali");
+    //Check add_request() return value
+    check_add = add_request(&head, "Board games", 150.00, "Bill");
+    if(check_add==-1){
+        printf("Board games was not added.\n");
+    }
+    check_add = add_request(&head, "IDE", 0.00, "TA who will not be named");
+    if(check_add==-1){
+        printf("IDE was not added.\n");
+    }
+    check_add = add_request(&head, "Balloons", 2.49, "Brian");
+    check_add = add_request(&head, "Limousine rental", 500.01, "Tony");
+    check_add = add_request(&head, "Coffee and doughnuts", 10.00, "Nhien");
+    check_add = add_request(&head, "Croissants", 25.50, "Gil");
+    check_add = add_request(&head, "Pineapple pizza", 29.99, "Jeffrey");
+    check_add = add_request(&head, "Charcuterie tray", 79.99, "Samantha");
+    check_add = add_request(&head, "Champagne", 100.00, "Samantha");
+
+    print_list(head); //10 requests added
+
+    //Remove Samantha's request for Champagne
+    printf("LIFO removal:\n");
+    remove_request(&head);
+    print_list(head);
+
+    
+    //Sort by price
+    printf("Sorting by price:");
+    make_sorted(&head);
+    print_list(head);
+    
+    //Finalize the shopping list
+    printf("Finalizing the shopping list:\n");
+    double remainder=0.00;
+    remainder = finalize_list(&head, 500.00);
+    print_list(head);
+    printf("The remainder after shopping is: %.2lf\n", remainder);
+
+    //Free the list
+    while(head!=NULL){
+        remove_request(&head);
+    }
+    printf("Ready to party!\n");
+    return 0;
+}
