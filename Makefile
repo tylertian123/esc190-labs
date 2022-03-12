@@ -1,6 +1,7 @@
 CFLAGS = -Wall -g
 LDLIBS = -lm
 .DEFAULT_GOAL := run3
+.PHONY = clean
 
 test1: lab1.o test1.o
 

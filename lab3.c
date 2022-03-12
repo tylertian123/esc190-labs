@@ -31,6 +31,8 @@ int add_request(struct party_node **head, char *item, double price, char *ta){
 
 //Remove the last item added
 void remove_request(struct party_node **head){
+	if (!*head)
+		return;
 	struct party_node *node = *head;
 	*head = (*head)->next;
 	free(node->item);
@@ -98,7 +100,9 @@ struct party_node* split(struct party_node *list) {
 
 //Sort party item requests - in place?
 void make_sorted(struct party_node **head){
-	// Base case: empty list or list of 1 element
+	// Merge sort in-place on a singly linked list
+	// 100% malloc()-free non-GMO guarantee
+	// Probably still O(n*log n), and probably still slower than just sorting normally out of place...
 	if (!*head || !(*head)->next)
 		return;
 	struct party_node *a = *head, *b;
