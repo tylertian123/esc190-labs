@@ -40,5 +40,6 @@ void collect_at_rank(PlayerRecord* curr, PlayerRecord* root, Player** players_at
 	int rank, int* count_el, int* max_el
 );
 void print_with_rank(PlayerRecord* root);
+void print_with_rank_fast(PlayerRecord* root);
 void print_tournament_records(PlayerRecord* curr, PlayerRecord* root);
 

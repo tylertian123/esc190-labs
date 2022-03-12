@@ -246,3 +246,46 @@ void print_with_rank(PlayerRecord* root){
 }
 
 
+typedef struct QueueNode {
+	PlayerRecord *record;
+	int rank;
+	struct QueueNode *next;
+} QueueNode;
+
+// Runs in O(n) best and worst case, where n is the number of players
+void print_with_rank_fast(PlayerRecord *root) {
+	// BFS with queue
+	QueueNode *qhead = (QueueNode *) malloc(sizeof(QueueNode));
+	QueueNode *qtail = qhead;
+	qhead->record = root;
+	qhead->rank = 1;
+	qhead->next = NULL;
+
+	while (qhead) {
+		// Only print if root or losing match to avoid duplicates
+		if (!qhead->record->parent || qhead->record->player != qhead->record->parent->player) {
+			printf("Rank %d: %s\n", qhead->rank, qhead->record->player->id);
+		}
+		// Enqueue children
+		if (qhead->record->left_child) {
+			QueueNode *n = (QueueNode *) malloc(sizeof(QueueNode));
+			n->record = qhead->record->left_child;
+			n->rank = qhead->rank + 1;
+			n->next = NULL;
+			qtail->next = n;
+			qtail = n;
+		}
+		if (qhead->record->right_child) {
+			QueueNode *n = (QueueNode *) malloc(sizeof(QueueNode));
+			n->record = qhead->record->right_child;
+			n->rank = qhead->rank + 1;
+			n->next = NULL;
+			qtail->next = n;
+			qtail = n;
+		}
+		// Dequeue head
+		QueueNode *temp = qhead;
+		qhead = qhead->next;
+		free(temp);
+	}
+}
