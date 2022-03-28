@@ -78,12 +78,11 @@ int get_player_rank(char player_id[], PlayerRecord* root){
 	
 	You may assume that each player has a unique id.
 	*/
+	if (!root) {
+		return 0;
+	}
 	if (!strcmp(root->player->id, player_id)) {
 		return 1;
-	}
-	// Assume there will always be neither or both children present
-	if (!root->left_child || !root->right_child) {
-		return 0;
 	}
 	int r = get_player_rank(player_id, root->left_child);
 	if (r) {
