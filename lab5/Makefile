@@ -13,6 +13,5 @@ valgrind: lab5
 	valgrind $(VALGRIND_FLAGS) ./lab5
 
 clean:
-	rm *.o
-	find . -type f -executable -exec rm {} \;
+	rm *.o; find . -type f -executable -exec rm {} \;
 
