@@ -1,5 +1,7 @@
 #include "lab5.h"
 
+#define INT_MAX 0x7FFFFFFF
+
 typedef struct {
     int cost;
     Vnode *prev;
@@ -106,11 +108,86 @@ char **plan_route(Graph *gr, char *start, char *dest){
 }
 
 void add(Graph *gr, char *station){
-    //Add code here
+    for (int i = 0; i < gr->count; i ++) {
+        if (!strcmp(gr->adj_list[i]->station, station)) {
+            return;
+        }
+    }
+    Vnode *node = (Vnode *) malloc(sizeof(Vnode));
+    strcpy(node->station, station);
+    node->edges = NULL;
+    node->cost = INT_MAX;
+    node->visited = 0;
+    node->prev = NULL;
+
+    gr->count ++;
+    gr->adj_list = realloc(gr->adj_list, gr->count * sizeof(Vnode *));
+    gr->adj_list[gr->count - 1] = node;
 }
 
 void update(Graph *gr, char *start, char *dest, int weight){
-    //Add code here
+    Vnode *s = NULL, *e = NULL;
+    // Look for start and end node
+    for (int i = 0; i < gr->count; i ++) {
+        if (!strcmp(gr->adj_list[i]->station, start)) {
+            s = gr->adj_list[i];
+        }
+        if (!strcmp(gr->adj_list[i]->station, dest)) {
+            e = gr->adj_list[i];
+        }
+    }
+    // Add missing nodes
+    if (!s) {
+        if (!weight) {
+            return;
+        }
+        add(gr, start);
+        s = gr->adj_list[gr->count - 1];
+    }
+    if (!e) {
+        if (!weight) {
+            return;
+        }
+        add(gr, dest);
+        e = gr->adj_list[gr->count - 1];
+    }
+
+    // Update existing
+    Enode *edge = s->edges, *prev = NULL;
+    while (edge) {
+        // Find the edge
+        if (!strcmp(edge->vertex, dest)) {
+            // Remove existing edge
+            if (!weight) {
+                // Head
+                if (edge == s->edges) {
+                    s->edges = s->edges->next;
+                }
+                else {
+                    prev->next = edge->next;
+                }
+                free(edge);
+                return;
+            }
+            else {
+                edge->weight = weight;
+                return;
+            }
+        }
+
+        prev = edge;
+        edge = edge->next;
+    }
+    // No existing edge
+    if (!weight) {
+        return;
+    }
+    // Create new
+    Enode *new_edge = (Enode *) malloc(sizeof(Enode));
+    strcpy(new_edge->vertex, dest);
+    new_edge->weight = weight;
+    new_edge->next = s->edges;
+    s->edges = new_edge;
 }
 
 void disrupt(Graph *gr, char *station){
