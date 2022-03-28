@@ -34,13 +34,16 @@ int hashtable_compare_key(HashTableKey a, HashTableKey b) {
     return !strcmp(a, b);
 }
 
+void hashtable_resize(HashTable *table, unsigned int new_size);
+
 void hashtable_insert(HashTable *table, HashTableKey key, HashTableValue value) {
+
     unsigned int hash = hashtable_hash(key);
     
     if (!table->entries) {
         // Start with 64 entries
         table->count = 0;
-        table->buckets = 64;
+        table->buckets = 4;
         table->entries = (HashTableEntry **) calloc(table->buckets, sizeof(HashTableEntry*));
     }
     
@@ -61,6 +64,27 @@ void hashtable_insert(HashTable *table, HashTableKey key, HashTableValue value) 
     new_entry->next = table->entries[index];
     table->entries[index] = new_entry;
     table->count ++;
+
+    if (table->count * 10 > table->buckets * 8) {
+        hashtable_resize(table, table->buckets * 2);
+    }
+}
+
+void hashtable_resize(HashTable *table, unsigned int new_size) {
+    HashTableEntry **old_entries = table->entries;
+    int buckets = table->buckets;
+
+    table->buckets = new_size;
+    table->count = 0;
+    table->entries = (HashTableEntry **) calloc(table->buckets, sizeof(HashTableEntry *));
+
+    for (int i = 0; i < buckets; i ++) {
+        HashTableEntry *e = old_entries[i];
+        while (e) {
+            hashtable_insert(table, e->key, e->value);
+            e = e->next;
+        }
+    }
 }
 
 HashTableValue hashtable_retrieve(HashTable *table, HashTableKey key) {
@@ -73,19 +97,28 @@ HashTableValue hashtable_retrieve(HashTable *table, HashTableKey key) {
         }
         entry = entry->next;
     }
-    return NULL; // Undefined behaviour
+    return 0;
 }
 
 #include <stdio.h>
 
 int main() {
     HashTable table = {NULL, 0, 0};
+    
     hashtable_insert(&table, "a", 1);
+    printf("Table has %d elements in %d buckets\n", table.count, table.buckets);
     hashtable_insert(&table, "b", 2);
     hashtable_insert(&table, "c", 3);
     hashtable_insert(&table, "d", 4);
+    printf("Table has %d elements in %d buckets\n", table.count, table.buckets);
+    hashtable_insert(&table, "e", 5);
+    hashtable_insert(&table, "f", 6);
+    hashtable_insert(&table, "g", 7);
+    hashtable_insert(&table, "h", 8);
+    hashtable_insert(&table, "i", 9);
+    printf("Table has %d elements in %d buckets\n", table.count, table.buckets);
 
-    printf("key %s value %d\n", "a", hashtable_retrieve(&table, "a"));
-    printf("key %s value %d\n", "c", hashtable_retrieve(&table, "c"));
-    printf("key %s value %d\n", "d", hashtable_retrieve(&table, "d"));
+    printf("key %s value %d\n", "e", hashtable_retrieve(&table, "e"));
+    printf("key %s value %d\n", "f", hashtable_retrieve(&table, "f"));
+    printf("key %s value %d\n", "g", hashtable_retrieve(&table, "g"));
 }
