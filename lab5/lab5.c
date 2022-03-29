@@ -6,6 +6,7 @@
 
 typedef struct {
     int cost;
+    Vnode *node;
     Vnode *prev;
 } HeapElement;
 
@@ -218,7 +219,7 @@ HashTableValue hashtable_retrieve(HashTable *table, HashTableKey key, int *conta
     if (contains_out) {
         *contains_out = 0;
     }
-    return 0;
+    return NULL;
 }
 
 HashTableValue hashtable_delete(HashTable *table, HashTableKey key) {
@@ -271,7 +272,75 @@ void hashtable_free(HashTable *table) {
 /******* Begin lab implementation *******/
 
 char **plan_route(Graph *gr, char *start, char *dest){
-    //Add code here
+    // First make a map of station names to Vnodes
+    HashTable *map = hashtable_init(64);
+    for (int i = 0; i < gr->count; i ++) {
+        hashtable_insert(map, gr->adj_list[i]->station, gr->adj_list[i]);
+        // Reset the state on the nodes
+        gr->adj_list[i]->cost = INT_MAX;
+        gr->adj_list[i]->prev = NULL;
+        gr->adj_list[i]->visited = 0;
+    }
+    // Find the start and end nodes
+    int found;
+    Vnode *start_node = hashtable_retrieve(map, start, &found);
+    if (!found) {
+        hashtable_free(map);
+        return NULL;
+    }
+    Vnode *dest_node = hashtable_retrieve(map, dest, &found);
+    if (!found) {
+        hashtable_free(map);
+        return NULL;
+    }
+    // Init binary heap
+    Heap *pq = heap_init();
+    // Insert start node with cost 0 and no previous node
+    heap_insert(pq, (HeapElement) {0, start_node, NULL});
+    // Dijkstra's algorithm
+    while (pq->count) {
+        HeapElement el = heap_remove(pq);
+        Vnode *node = el.node;
+        // Only visit node if it's unvisited
+        // Nodes may get enqueued multiple times because this heap implementation has no update priority function
+        if (!node->visited) {
+            node->cost = el.cost;
+            node->visited = 1;
+            node->prev = el.prev;
+            if (node == dest_node) {
+                // Path found!
+                Vnode *v = node;
+                int len = 0;
+                do {
+                    len ++;
+                } while ((v = v->prev));
+                char **path = (char **) malloc(sizeof(char*) * len);
+                v = node;
+                for (int i = 0; v; i++, v = v->prev) {
+                    path[i] = (char *) malloc(sizeof(char) * (strlen(v->station) + 1));
+                    strcpy(path[i], v->station);
+                }
+                
+                hashtable_free(map);
+                heap_free(pq);
+                return path;
+            }
+            // Check children
+            Enode *edge = node->edges;
+            while (edge) {
+                Vnode *child = hashtable_retrieve(map, edge->vertex, NULL);
+                if (node->cost + edge->weight < child->cost) {
+                    heap_insert(pq, (HeapElement) {node->cost + edge->weight, child, node});
+                }
+                edge = edge->next;
+            }
+        }
+    }
+
+    // Cleanup
+    hashtable_free(map);
+    heap_free(pq);
+    return NULL;
 }
 
 void add(Graph *gr, char *station){

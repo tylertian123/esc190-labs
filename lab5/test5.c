@@ -20,23 +20,23 @@ int main(){
     
     print_gr(gr);
     printf("******************\n");
-    //char **r = plan_route(gr, "Kipling", "Don Mills");
-    //print_route(r, "Kipling");
+    char **r = plan_route(gr, "Kipling", "Don Mills");
+    print_route(r, "Kipling");
 
     //Bye bye Bay!
     disrupt(gr, "Bay");
     print_gr(gr);
     printf("******************\n");
-    //r = plan_route(gr, "Kipling", "Don Mills");
-    //print_route(r, "Kipling");
+    r = plan_route(gr, "Kipling", "Don Mills");
+    print_route(r, "Kipling");
 
     //Hello new stations
     update(gr, "Yorkdale", "Sheppard West", 5);
     update(gr, "Sheppard West", "Sheppard-Yonge", 4);
     print_gr(gr);
     printf("******************\n");
-    //r = plan_route(gr, "Kipling", "Don Mills");
-    //print_route(r, "Kipling");
+    r = plan_route(gr, "Kipling", "Don Mills");
+    print_route(r, "Kipling");
 
     update(gr, "Sheppard West", "Sheppard-Yonge", 0);
     update(gr, "Yorkdale", "Sheppard West", 1);
