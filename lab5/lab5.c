@@ -2,6 +2,8 @@
 
 #define INT_MAX 0x7FFFFFFF
 
+/******* Binary heap *******/
+
 typedef struct {
     int cost;
     Vnode *prev;
@@ -118,8 +120,10 @@ void heap_free(Heap *heap) {
 }
 
 
-typedef char *HashTableKey;
-typedef int HashTableValue;
+/******* Hash table *******/
+
+typedef char* HashTableKey;
+typedef Vnode* HashTableValue;
 
 
 typedef struct HashTableEntry {
@@ -264,6 +268,8 @@ void hashtable_free(HashTable *table) {
     free(table);
 }
 
+/******* Begin lab implementation *******/
+
 char **plan_route(Graph *gr, char *start, char *dest){
     //Add code here
 }
@@ -352,5 +358,51 @@ void update(Graph *gr, char *start, char *dest, int weight){
 }
 
 void disrupt(Graph *gr, char *station){
-    //Add code here
+    if (!gr->count) {
+        return;
+    }
+    Vnode *node = NULL;
+    int i = 0;
+    for (; i < gr->count; i++) {
+        if (!strcmp(gr->adj_list[i]->station, station)) {
+            node = gr->adj_list[i];
+            break;
+        }
+    }
+    if (!node) {
+        return;
+    }
+    // Shift everything over
+    for (; i < gr->count - 1; i++) {
+        gr->adj_list[i] = gr->adj_list[i + 1];
+    }
+    gr->count --;
+    gr->adj_list = realloc(gr->adj_list, gr->count * sizeof(Vnode*));
+    
+    Enode *n = node->edges;
+    while (n) {
+        Enode *temp = n->next;
+        free(n);
+        n = temp;
+    }
+    free(node);
+
+    // Delete edges connecting to it
+    for (int i = 0; i < gr->count; i++) {
+        Enode *edge = gr->adj_list[i]->edges, *prev = NULL;
+        while (edge) {
+            Enode *temp = edge->next;
+            if (!strcmp(edge->vertex, station)) {
+                if (!prev) {
+                    gr->adj_list[i]->edges = temp;
+                }
+                else {
+                    prev->next = temp;
+                }
+                free(edge);
+            }
+            prev = edge;
+            edge = temp;
+        }
+    }
 }
