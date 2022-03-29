@@ -81,15 +81,47 @@ void hashtable_resize(HashTable *table, unsigned int new_size) {
     free(old_entries);
 }
 
-HashTableValue hashtable_retrieve(HashTable *table, HashTableKey key) {
+HashTableValue hashtable_retrieve(HashTable *table, HashTableKey key, int *contains_out) {
     unsigned int hash = hashtable_hash(key);
     unsigned int index = hash % table->buckets;
     HashTableEntry *entry = table->entries[index];
     while (entry) {
         if (hashtable_compare_key(entry->key, key)) {
+            if (contains_out) {
+                *contains_out = 1;
+            }
             return entry->value;
         }
         entry = entry->next;
+    }
+    if (contains_out) {
+        *contains_out = 0;
+    }
+    return 0;
+}
+
+HashTableValue hashtable_delete(HashTable *table, HashTableKey key) {
+    unsigned int hash = hashtable_hash(key);
+    unsigned int index = hash % table->buckets;
+    HashTableEntry *entry = table->entries[index], *parent = NULL;
+    while (entry) {
+        if (hashtable_compare_key(entry->key, key)) {
+            break;
+        }
+        parent = entry;
+        entry = entry->next;
+    }
+    // Delete entry if it exists
+    if (entry) {
+        HashTableValue retval = entry->value;
+        if (!parent) {
+            table->entries[index] = entry->next;
+        }
+        else {
+            parent->next = entry->next;
+        }
+        free(entry);
+        return retval;
     }
     return 0;
 }
@@ -133,9 +165,14 @@ int main() {
     hashtable_insert(table, "i", 9);
     printf("Table has %d elements in %d buckets\n", table->count, table->buckets);
 
-    printf("key %s value %d\n", "e", hashtable_retrieve(table, "e"));
-    printf("key %s value %d\n", "f", hashtable_retrieve(table, "f"));
-    printf("key %s value %d\n", "g", hashtable_retrieve(table, "g"));
+    printf("Deleting key %s (value %d)\n", "a", hashtable_delete(table, "a"));
+    int contains;
+    hashtable_retrieve(table, "a", &contains);
+    printf("Table contains %s?: %d\n", "a", contains);
+
+    printf("key %s value %d\n", "e", hashtable_retrieve(table, "e", NULL));
+    printf("key %s value %d\n", "f", hashtable_retrieve(table, "f", NULL));
+    printf("key %s value %d\n", "g", hashtable_retrieve(table, "g", NULL));
 
     hashtable_free(table);
 }
