@@ -98,27 +98,44 @@ HeapElement heap_remove(Heap *heap) {
     return e;
 }
 
+Heap* heap_init() {
+    Heap *heap = (Heap*) malloc(sizeof(Heap));
+    heap->count = heap->capacity = 0;
+    heap->elems = NULL;
+    return heap;
+}
+
+void heap_free(Heap *heap) {
+    if (heap->elems) {
+        free(heap->elems);
+    }
+    free(heap);
+}
+
 #include <stdio.h>
 
-void main() {
-    Heap heap = {NULL, 0, 0};
-    heap_insert(&heap, 1);
-    heap_insert(&heap, 2);
-    heap_insert(&heap, 4);
-    heap_insert(&heap, 3);
-    heap_insert(&heap, 5);
+int main() {
+    Heap *heap = heap_init();
+    heap_insert(heap, 1);
+    heap_insert(heap, 2);
+    heap_insert(heap, 4);
+    heap_insert(heap, 3);
+    heap_insert(heap, 5);
 
-    printf("%d ", heap_remove(&heap));
-    heap_insert(&heap, 8);
-    heap_insert(&heap, 6);
-    printf("%d ", heap_remove(&heap));
-    printf("%d ", heap_remove(&heap));
-    heap_insert(&heap, 9);
-    printf("%d ", heap_remove(&heap));
-    heap_insert(&heap, 7);
-    printf("%d ", heap_remove(&heap));
-    printf("%d ", heap_remove(&heap));
-    printf("%d ", heap_remove(&heap));
-    printf("%d ", heap_remove(&heap));
-    printf("%d ", heap_remove(&heap));
+    printf("%d ", heap_remove(heap));
+    heap_insert(heap, 8);
+    heap_insert(heap, 6);
+    printf("%d ", heap_remove(heap));
+    printf("%d ", heap_remove(heap));
+    heap_insert(heap, 9);
+    printf("%d ", heap_remove(heap));
+    heap_insert(heap, 7);
+    printf("%d ", heap_remove(heap));
+    printf("%d ", heap_remove(heap));
+    printf("%d ", heap_remove(heap));
+    printf("%d ", heap_remove(heap));
+    printf("%d\n", heap_remove(heap));
+    heap_free(heap);
+
+    return 0;
 }
