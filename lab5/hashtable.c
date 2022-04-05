@@ -74,8 +74,10 @@ void hashtable_resize(HashTable *table, unsigned int new_size) {
     for (int i = 0; i < buckets; i ++) {
         HashTableEntry *e = old_entries[i];
         while (e) {
+            HashTableEntry *next = e->next;
             hashtable_insert(table, e->key, e->value);
-            e = e->next;
+            free(e);
+            e = next;
         }
     }
     free(old_entries);
@@ -150,7 +152,7 @@ void hashtable_free(HashTable *table) {
 #include <stdio.h>
 
 int main() {
-    HashTable *table = hashtable_init(64);
+    HashTable *table = hashtable_init(1);
     
     hashtable_insert(table, "a", 1);
     printf("Table has %d elements in %d buckets\n", table->count, table->buckets);

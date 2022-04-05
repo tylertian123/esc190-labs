@@ -196,8 +196,10 @@ void hashtable_resize(HashTable *table, unsigned int new_size) {
     for (int i = 0; i < buckets; i ++) {
         HashTableEntry *e = old_entries[i];
         while (e) {
+            HashTableEntry *next = e->next;
             hashtable_insert(table, e->key, e->value);
-            e = e->next;
+            free(e);
+            e = next;
         }
     }
     free(old_entries);
@@ -273,7 +275,7 @@ void hashtable_free(HashTable *table) {
 
 char **plan_route(Graph *gr, char *start, char *dest){
     // First make a map of station names to Vnodes
-    HashTable *map = hashtable_init(64);
+    HashTable *map = hashtable_init(256);
     for (int i = 0; i < gr->count; i ++) {
         hashtable_insert(map, gr->adj_list[i]->station, gr->adj_list[i]);
         // Reset the state on the nodes
